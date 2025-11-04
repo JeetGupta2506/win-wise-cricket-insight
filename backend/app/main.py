@@ -7,7 +7,11 @@ app = FastAPI(title="Win Wise Cricket Insight API")
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Vite dev server
+    allow_origins=[
+        "http://localhost:5173",  # Default Vite dev server
+        "http://localhost:8080",  # Alternative Vite port
+        "http://localhost:3000",  # Common React port
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
