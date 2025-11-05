@@ -25,11 +25,11 @@ venv/
 env/
 ENV/
 
-# ML Models
-models/*.pkl
+# ML Models - Keep trained models for deployment
+# models/*.pkl  # Commented out - we want to commit the trained model
 models/*.h5
 models/*.pth
-data/*.csv
+# data/*.csv  # Commented out - we need the CSV for training/deployment
 !data/.gitkeep
 
 # Environment variables
