@@ -93,7 +93,7 @@ class CricketPredictor:
             
             # Get prediction probabilities
             probabilities = self.model.predict_proba(df)[0]
-            prediction = self.model.predict(df)[0]
+            prediction = self.model.predict(df)
             
             # Debug logging
             logger.debug(f"probabilities array: {probabilities}")
@@ -106,7 +106,9 @@ class CricketPredictor:
             # probabilities[1] = probability of batting team winning
             
             batting_team_win_probability = probabilities[1]  # Class 1 = batting team wins
-            predicted_class_idx = int(prediction[0])
+            
+            # Handle both scalar and array predictions
+            predicted_class_idx = int(prediction[0]) if hasattr(prediction, '__len__') else int(prediction)
             
             logger.debug(f"predicted_class_idx: {predicted_class_idx}")
             logger.debug(f"batting_team_win_prob: {batting_team_win_probability}")
