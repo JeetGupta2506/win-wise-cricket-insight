@@ -11,6 +11,8 @@ app.add_middleware(
         "http://localhost:5173",  # Default Vite dev server
         "http://localhost:8080",  # Alternative Vite port
         "http://localhost:3000",  # Common React port
+        "https://*.vercel.app",  # All Vercel deployments
+        "https://vercel.app",    # Vercel domains
     ],
     allow_credentials=True,
     allow_methods=["*"],
