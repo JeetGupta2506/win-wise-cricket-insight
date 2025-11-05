@@ -7,9 +7,11 @@
 3. Connect your repository
 4. Settings:
    - **Root Directory**: `backend`
-   - **Build Command**: `pip install -r requirements.txt && python train_model.py`
+   - **Build Command**: `pip install -r requirements.txt`
    - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 5. Deploy and copy your backend URL (e.g., `https://cricket-predictor-api.onrender.com`)
+
+> ⚡ **Fast deployment**: Pre-trained model included in repo - no training needed!
 
 ### 2. Deploy Frontend to Vercel
 

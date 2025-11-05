@@ -18,13 +18,15 @@
    - **Runtime**: `Python 3`
    - **Build Command**: 
      ```
-     pip install -r requirements.txt && python train_model.py
+     pip install -r requirements.txt
      ```
    - **Start Command**: 
      ```
      uvicorn app.main:app --host 0.0.0.0 --port $PORT
      ```
    - **Instance Type**: Free (or choose paid for better performance)
+
+> **Note**: The trained model files (`*.pkl`) are included in the repository, so no training is needed during deployment. This makes deployment faster and more reliable!
 
 5. Add Environment Variables (if needed):
    - Click "Environment" tab
@@ -110,10 +112,10 @@ Commit and push this change. Render will automatically redeploy.
 ## Common Issues & Solutions
 
 ### Issue 1: "Model file not found" error on Render
-**Solution**: The model needs to be trained during deployment
-- Check that `cricket_features.csv` is in the root directory
-- Verify build command includes: `python train_model.py`
-- Check Render logs for training output
+**Solution**: The trained model files are included in the repository
+- Verify `backend/models/cricket_model.pkl` exists in your repo
+- Check Render logs to ensure files were copied during deployment
+- If missing, retrain locally and commit: `python train_model.py && git add backend/models/*.pkl && git commit -m "Update model" && git push`
 
 ### Issue 2: CORS errors in browser
 **Solution**: 
