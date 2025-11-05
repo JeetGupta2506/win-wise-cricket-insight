@@ -190,28 +190,70 @@ class CricketPredictor:
     def _get_feature_importance_explanation(self, df: pd.DataFrame) -> List[Dict]:
         """
         Alternative explanation using feature importance from RandomForest
-        Used when SHAP is not available
+        combined with input values to create dynamic explanations.
+        Used when SHAP is not available.
         """
         try:
             classifier = self.model.named_steps['classifier']
             feature_names = self._get_feature_names()
             
-            # Get feature importances
+            # Get feature importances (static model weights)
             importances = classifier.feature_importances_
             
-            # Create list of feature importances
+            # Get input data to create dynamic explanations
+            input_data = df.iloc[0]
+            
+            # Create list of feature importances weighted by input values
             importance_list = []
-            for idx, importance in enumerate(importances):
-                if importance > 0.01:  # Only include significant features
-                    feature_name = feature_names[idx] if idx < len(feature_names) else f"feature_{idx}"
+            
+            # Focus on numerical features with actual values
+            numerical_features = {
+                'runs_required': input_data.get('runs_required', 0),
+                'wickets_in_hand': input_data.get('wickets_in_hand', 0),
+                'balls_remaining': input_data.get('balls_remaining', 0),
+                'required_run_rate': input_data.get('required_run_rate', 0),
+                'current_run_rate': input_data.get('current_run_rate', 0),
+            }
+            
+            # Calculate dynamic impacts based on input values
+            for feature, value in numerical_features.items():
+                if feature in feature_names:
+                    idx = feature_names.index(feature)
+                    base_importance = importances[idx] if idx < len(importances) else 0.1
+                    
+                    # Determine impact direction based on feature and value
+                    impact_direction = 'positive'
+                    impact_value = base_importance
+                    
+                    if feature == 'runs_required':
+                        # Higher runs required = harder to win (negative)
+                        impact_direction = 'negative' if value > 100 else 'positive'
+                        impact_value = base_importance * (value / 200)  # Scale by value
+                    elif feature == 'wickets_in_hand':
+                        # More wickets = better (positive)
+                        impact_direction = 'positive'
+                        impact_value = base_importance * (value / 10)
+                    elif feature == 'required_run_rate':
+                        # Higher RRR = harder (negative)
+                        impact_direction = 'negative' if value > 8 else 'positive'
+                        impact_value = base_importance * min(value / 10, 1.0)
+                    elif feature == 'current_run_rate':
+                        # Higher CRR = better (positive)
+                        impact_direction = 'positive'
+                        impact_value = base_importance * min(value / 10, 1.0)
+                    elif feature == 'balls_remaining':
+                        # More balls = better (positive)
+                        impact_direction = 'positive'
+                        impact_value = base_importance * (value / 120)
+                    
                     importance_list.append({
-                        'feature': self._clean_feature_name(feature_name),
-                        'value': float(importance),
-                        'impact': 'positive'  # Feature importance is always positive
+                        'feature': self._clean_feature_name(feature),
+                        'value': float(impact_value),
+                        'impact': impact_direction
                     })
             
-            # Sort by importance and take top 10
-            importance_list = sorted(importance_list, key=lambda x: x['value'], reverse=True)[:10]
+            # Sort by absolute importance and take top 5
+            importance_list = sorted(importance_list, key=lambda x: abs(x['value']), reverse=True)[:5]
             
             return importance_list
             
