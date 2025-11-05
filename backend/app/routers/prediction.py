@@ -29,3 +29,18 @@ async def predict_match(match_data: MatchInput):
         logger.exception("Unhandled error in /api/predict")
         # Return a generic HTTP 500 with minimal detail
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.get("/health")
+async def health():
+    """Simple health endpoint reporting model readiness"""
+    global prediction_service
+    if prediction_service is None:
+        try:
+            prediction_service = PredictionService()
+        except Exception:
+            logger.exception("Failed to initialize PredictionService during health check")
+            return {"ready": False, "model_loaded": False}
+
+    model_loaded = getattr(prediction_service, 'model_loaded', False)
+    return {"ready": True, "model_loaded": bool(model_loaded)}

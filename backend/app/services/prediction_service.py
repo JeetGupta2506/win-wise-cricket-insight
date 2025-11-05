@@ -21,6 +21,18 @@ class PredictionService:
         except Exception:
             # Log full stack and keep predictor as None so other code paths can handle fallback.
             logger.exception("Failed to initialize CricketPredictor during PredictionService startup")
+        # Set model_loaded flag for diagnostics
+        try:
+            self.model_loaded = bool(getattr(self.predictor, 'model', None))
+            logger.info(f"Model loaded: {self.model_loaded}")
+            if self.model_loaded:
+                # If model_info exists, log a short summary
+                model_info = getattr(self.predictor, 'model_info', None)
+                if model_info:
+                    logger.info(f"Model info keys: {list(model_info.keys())}")
+        except Exception:
+            self.model_loaded = False
+            logger.exception("Error determining model_loaded flag")
     
     async def predict(self, match_data: MatchInput) -> PredictionResponse:
         """
