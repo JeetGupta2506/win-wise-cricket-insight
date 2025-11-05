@@ -51,14 +51,19 @@ class PredictionService:
         # Determine confidence level
         confidence = "high" if probability > 0.7 else "medium" if probability > 0.6 else "low"
         
-        # Convert SHAP values to response format
-        shap_explanation = [
-            ShapValue(
-                feature=sv['feature'],
-                value=sv['value'],
-                impact=sv['impact']
-            ) for sv in shap_values
-        ]
+        # Convert SHAP values to response format (defensively)
+        shap_explanation = []
+        try:
+            for sv in shap_values:
+                # Ensure keys exist and types are correct
+                feature = str(sv.get('feature', 'Unknown'))
+                value = float(sv.get('value', 0.0))
+                impact = str(sv.get('impact', 'neutral'))
+                shap_explanation.append(ShapValue(feature=feature, value=value, impact=impact))
+        except Exception as e:
+            # Fallback to default explanation to avoid 500s
+            print(f"Error converting SHAP values: {e}")
+            shap_explanation = [ShapValue(**sv) for sv in self._default_shap_values()]
         
         # Prepare factors
         factors = {
