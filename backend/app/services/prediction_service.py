@@ -9,12 +9,13 @@ class PredictionService:
     
     def __init__(self):
         # Load the trained ML model
+        self.predictor = None  # Initialize to None first
         try:
             self.predictor = CricketPredictor()
             print("ML Predictor initialized successfully")
         except Exception as e:
             print(f"Error initializing predictor: {e}")
-            self.predictor = None
+            # predictor remains None, will use fallback
     
     async def predict(self, match_data: MatchInput) -> PredictionResponse:
         """
